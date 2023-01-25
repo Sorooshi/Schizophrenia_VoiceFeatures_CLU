@@ -20,9 +20,11 @@ fn_list_ii = [
 
 
 def get_feature_vector(y, s):
-    fv_i = [np.mean(funct(y, s)) for funct in fn_list_i]
-    fv_ii = [np.mean(funct(y)) for funct in fn_list_ii]
-    f_v = fv_i + fv_ii
+    fv_i_m = [np.mean(funct(y, s)) for funct in fn_list_i]
+    fv_ii_m = [np.mean(funct(y)) for funct in fn_list_ii]
+    fv_i_s = [np.std(funct(y, s)) for funct in fn_list_i]
+    fv_ii_s = [np.std(funct(y)) for funct in fn_list_ii]
+    f_v = fv_i_m + fv_ii_m + fv_i_s + fv_ii_s
     return f_v
 
 
@@ -40,9 +42,6 @@ for file in wav_files:
     if file[10:16] in list(schizophrenia_only.ID):
         y, sr = lb.load(file, sr=None)
         fv = get_feature_vector(y, sr)
-        fv.append(np.mean(fv))
-        fv.append(np.median(fv))
-        fv.append(np.std(fv))
         fv.insert(0, file[10:16])
         fv.insert(1, file.split("-")[2])
         fv.insert(2, schizophrenia_only.loc[(schizophrenia_only['ID'] == file[10:16]), 'thought.disorder.symptoms'].item())
@@ -50,8 +49,10 @@ for file in wav_files:
 
 
 norm_output = 'voice_features.csv'
-header = ["id", "stimulus", "symptoms_score", "chroma_stft", "spectral_centroid", "spectral_bandwidth", "spectral_contrast",
-          "spectral_rolloff", "zero_crossing_rate", "spectral_flatness", "mean", "median", "standard_deviation"]
+header = ["id", "stimulus", "symptoms_score", "chroma_stft_mean", "spectral_centroid_mean", "spectral_bandwidth_mean",
+          "spectral_contrast_mean", "spectral_rolloff_mean", "zero_crossing_rate_mean", "spectral_flatness_mean", "chroma_stft_std",
+          "spectral_centroid_std", "spectral_bandwidth_std", "spectral_contrast_std", "spectral_rolloff_std",
+          "zero_crossing_rate_std", "spectral_flatness_std"]
 
 with open(norm_output, "+w") as f:
     csv_writer = csv.writer(f, delimiter=",")
